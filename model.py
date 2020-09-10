@@ -49,7 +49,8 @@ parameters = dict(
 param_values = [v for v in parameters.values()]
 
 # Training Loop
-for lr,batch_size, shuffle in product(*param_values):
+for run_id, (lr,batch_size, shuffle) in enumerate(product(*param_values)):
+    print("run id:", run_id + 1)
     model = CNN().to(device)
     train_loader = torch.utils.data.DataLoader(train_set,batch_size = batch_size, shuffle = shuffle)
     optimizer = opt.Adam(model.parameters(), lr= lr)
@@ -75,15 +76,16 @@ for lr,batch_size, shuffle in product(*param_values):
         tb.add_scalar("Correct", total_correct, epoch)
         tb.add_scalar("Accuracy", total_correct/ len(train_set), epoch)
 
-        tb.add_hparams(
-            {"lr": lr, "bsize": batch_size},
+        print("batch_size:",batch_size, "lr:",lr,"shuffle:",shuffle)
+        print("epoch:", epoch, "total_correct:", total_correct, "loss:",total_loss)
+    print("___________________________________________________________________")
+
+    tb.add_hparams(
+            {"lr": lr, "bsize": batch_size, "shuffle":shuffle},
             {
                 "accuracy": total_correct/ len(train_set),
                 "loss": total_loss,
             },
         )
-
-        print("batch_size:",batch_size, "lr:",lr,"shuffle:",shuffle)
-        print("epoch:", epoch, "total_correct:", total_correct, "loss:",total_loss)
 
 tb.close()
